@@ -85,15 +85,27 @@ const getLatestCandleDate = async () => {
   return date;
 };
 
-const createOrder = async (apiKey,  direction, price, amount, pair, orderType) => {
-  const res = await axios.post(binanceApiUrl + '/order', { }, {headers: { 'X-MBX-APIKEY': process.env.BINANCE_API_KEY}});
+const createOrder = async (apiKey, direction, price, amount, pair, orderType) => {
+  const res = await axios.post(
+    binanceApiUrl + '/order',
+    { symbol: pair, side: direction, price, quantity: amount, type: orderType },
+    { headers: { 'X-MBX-APIKEY': apiKey } },
+  );
   return res.data;
-}
+};
+
+const cancelOrder = async (apiKey, symbol, uuid) => {
+  const res = await axios.delete(
+    binanceApiUrl + '/order',
+    { symbol, orderId: uuid },
+    { headers: { 'X-MBX-APIKEY': apiKey } },
+  );
+  return res.data;
+};
 
 const main = async () => {
   await migrate();
-
-  setInterval(refreshDataCandle, 5 * 60 * 1000);
+  setInterval(refreshDataCandle, binanceCandleRefreshRate);
 };
 
 main();
